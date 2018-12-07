@@ -1,128 +1,89 @@
+using System.Collections.Generic;
+
 namespace Tennis
 {
     using System;
-    using System.Media;
 
     class TennisGame1 : ITennisGame
     {
-        private Int32 m_score1 = 0;
-
-        private Int32 m_score2 = 0;
-
-        private String player1Name;
-
-        private String player2Name;
-
-        private Player _player1;
-
-        private Player _player2;
+        Dictionary<int, string> _scoreTranslation = new Dictionary<int, string>
+        {
+            [0] = "Love",
+            [1] = "Fifteen",
+            [2] = "Thirty",
+            [3] = "Forty"
+        };
+        private readonly Player _player1;
+        private readonly Player _player2;
 
         public TennisGame1(String player1Name, String player2Name)
         {
-            this.player1Name = player1Name;
-            this.player2Name = player2Name;
-
             _player1 = new Player(player1Name);
-            _player2 = new Player(player1Name);
+            _player2 = new Player(player2Name);
         }
 
         public void WonPoint(String playerName)
         {
             if (playerName == "player1")
             {
-                m_score1 += 1;
+                _player1.Score += 1;
             }
             else
             {
-                m_score2 += 1;
+                _player2.Score += 1;
             }
         }
 
         public String GetScore()
         {
-            String score = string.Empty;
-            Int32 tempScore = 0;
-            if (m_score1 == m_score2)
-            {
-                switch (m_score1)
-                {
-                    case 0:
-                        score = "Love-All";
-                        break;
-                    case 1:
-                        score = "Fifteen-All";
-                        break;
-                    case 2:
-                        score = "Thirty-All";
-                        break;
-                    default:
-                        score = "Deuce";
-                        break;
-                }
-            }
-            else if (m_score1 >= 4 || m_score2 >= 4)
-            {
-                Int32 minusResult = m_score1 - m_score2;
-                if (minusResult == 1)
-                {
-                    score = "Advantage player1";
-                }
-                else if (minusResult == -1)
-                {
-                    score = "Advantage player2";
-                }
-                else if (minusResult >= 2)
-                {
-                    score = "Win for player1";
-                }
-                else
-                {
-                    score = "Win for player2";
-                }
-            }
-            else
-            {
-                for (Int32 i = 1; i < 3; i++)
-                {
-                    if (i == 1)
-                    {
-                        tempScore = m_score1;
-                    }
-                    else
-                    {
-                        score += "-";
-                        tempScore = m_score2;
-                    }
 
-                    switch (tempScore)
-                    {
-                        case 0:
-                            score += "Love";
-                            break;
-                        case 1:
-                            score += "Fifteen";
-                            break;
-                        case 2:
-                            score += "Thirty";
-                            break;
-                        case 3:
-                            score += "Forty";
-                            break;
-                    }
-                }
+            if (IsOnFinalPartofGame())
+            {
+                var leader = GetLeader();
+                if (IsDeuce(leader))
+                    return "Deuce";
+
+                return HasAdvantage() ? $"Advantage {leader}" : $"Win for {leader}";
             }
 
-            return score;
+            if (IsDraw())
+            {
+                return $"{_scoreTranslation[_player1.Score]}-All";
+            }
+
+            return $"{_scoreTranslation[_player1.Score]}-{_scoreTranslation[_player2.Score]}";
         }
-    }
 
-    internal class Player
-    {
-        public string Name { get; }
-
-        public Player(string name)
+        private static bool IsDeuce(string leader)
         {
-            Name = name;
+            return leader == null;
+        }
+
+        private bool IsOnFinalPartofGame()
+        {
+            return _player1.Score >= 4 || _player2.Score >= 4 || (_player1.Score == 3 && _player2.Score == 3);
+        }
+
+        private bool IsDraw()
+        {
+            return _player1.Score == _player2.Score && _player1.Score < 3;
+        }
+
+        private bool HasAdvantage()
+        {
+            Int32 minusResult = _player1.Score - _player2.Score;
+            return minusResult == 1 || minusResult == -1;
+        }
+
+        private string GetLeader()
+        {
+            int minusResult = _player1.Score - _player2.Score;
+            if (minusResult >= 1)
+                return _player1.Name;
+            if (minusResult <= -1)
+                return _player2.Name;
+
+            return null;
         }
     }
 }
