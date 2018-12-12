@@ -1,41 +1,88 @@
-using System;
-
 namespace Tennis
 {
-  public class TennisGame3 : ITennisGame
-  {
-    private int p2;
-    private int p1;
-    private string p1N;
-    private string p2N;
+    using System.Collections.Generic;
 
-    public TennisGame3 (string player1Name, string player2Name)
+    public class TennisGame3 : ITennisGame
     {
-      this.p1N = player1Name;
-      this.p2N = player2Name;
-    }
+        private readonly Dictionary<int, string> _scoreTranslation = new Dictionary<int, string>
+                                                                         {
+                                                                             [0] = "Love",
+                                                                             [1] = "Fifteen",
+                                                                             [2] = "Thirty",
+                                                                             [3] = "Forty"
+                                                                         };
 
-    public string GetScore() {
-      string s;
-      if ((p1 < 4 && p2 < 4) && (p1 + p2 < 6)) {
-        string[] p = new String[]{"Love", "Fifteen", "Thirty", "Forty"}; 
-        s = p[p1];
-        return (p1 == p2) ? s + "-All" : s + "-" + p[p2];
-      } else {
-        if (p1 == p2)
-          return "Deuce";
-        s = p1 > p2 ? p1N : p2N;
-        return ((p1-p2)*(p1-p2) == 1) ? "Advantage " + s : "Win for " + s;
-      }
-    }
-    
-    public void WonPoint(string playerName) {
-      if (playerName == "player1")
-        this.p1 += 1;
-      else
-        this.p2 += 1;
-    }
+        private readonly Player _player1;
 
-  }
+        private readonly Player _player2;
+
+        public TennisGame3(string player1Name, string player2Name)
+            : this(new Player(player1Name), new Player(player2Name))
+        {
+        }
+
+        public TennisGame3(Player player1, Player player2)
+        {
+            _player1 = player1;
+            _player2 = player2;
+        }
+
+        public string GetScore()
+        {
+            if (IsRegular())
+            {
+                if (IsDraw())
+                {
+                    return _scoreTranslation[_player1.Score] + "-All";
+                }
+
+                return _scoreTranslation[_player1.Score] + "-" + _scoreTranslation[_player2.Score];
+            }
+
+            if (IsDeuce())
+            {
+                return "Deuce";
+            }
+
+            var leader = GetLeader();
+            return HasAdvantage() ? "Advantage " + leader : "Win for " + leader;
+        }
+
+        public void WonPoint(string playerName)
+        {
+            if (playerName == _player1.Name)
+            {
+                _player1.Score += 1;
+            }
+            else
+            {
+                _player2.Score += 1;
+            }
+        }
+
+        private bool HasAdvantage()
+        {
+            return (_player1.Score - _player2.Score) * (_player1.Score - _player2.Score) == 1;
+        }
+
+        private bool IsDraw()
+        {
+            return _player1.Score == _player2.Score;
+        }
+
+        private string GetLeader()
+        {
+            return _player1.Score > _player2.Score ? _player1.Name : _player2.Name;
+        }
+
+        private bool IsDeuce()
+        {
+            return _player1.Score == _player2.Score;
+        }
+
+        private bool IsRegular()
+        {
+            return _player1.Score < 4 && _player2.Score < 4 && _player1.Score + _player2.Score < 6;
+        }
+    }
 }
-

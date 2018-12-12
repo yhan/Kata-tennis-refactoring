@@ -1,6 +1,6 @@
 namespace Tennis
 {
-    internal class Player
+    public class Player
     {
         public string Name { get; }
         public int Score { get; set; }

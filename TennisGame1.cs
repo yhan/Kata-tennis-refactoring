@@ -1,30 +1,30 @@
-using System.Collections.Generic;
-
 namespace Tennis
 {
-    using System;
+    using System.Collections.Generic;
 
     class TennisGame1 : ITennisGame
     {
-        Dictionary<int, string> _scoreTranslation = new Dictionary<int, string>
-        {
-            [0] = "Love",
-            [1] = "Fifteen",
-            [2] = "Thirty",
-            [3] = "Forty"
-        };
         private readonly Player _player1;
+
         private readonly Player _player2;
 
-        public TennisGame1(String player1Name, String player2Name)
+        private readonly Dictionary<int, string> _scoreTranslation = new Dictionary<int, string>
+                                                        {
+                                                            [0] = "Love",
+                                                            [1] = "Fifteen",
+                                                            [2] = "Thirty",
+                                                            [3] = "Forty"
+                                                        };
+
+        public TennisGame1(string player1Name, string player2Name)
         {
             _player1 = new Player(player1Name);
             _player2 = new Player(player2Name);
         }
 
-        public void WonPoint(String playerName)
+        public void WonPoint(string playerName)
         {
-            if (playerName == "player1")
+            if (playerName == _player1.Name)
             {
                 _player1.Score += 1;
             }
@@ -34,14 +34,15 @@ namespace Tennis
             }
         }
 
-        public String GetScore()
+        public string GetScore()
         {
-
             if (IsOnFinalPartofGame())
             {
                 var leader = GetLeader();
                 if (IsDeuce(leader))
+                {
                     return "Deuce";
+                }
 
                 return HasAdvantage() ? $"Advantage {leader}" : $"Win for {leader}";
             }
@@ -61,7 +62,7 @@ namespace Tennis
 
         private bool IsOnFinalPartofGame()
         {
-            return _player1.Score >= 4 || _player2.Score >= 4 || (_player1.Score == 3 && _player2.Score == 3);
+            return _player1.Score >= 4 || _player2.Score >= 4 || _player1.Score == 3 && _player2.Score == 3;
         }
 
         private bool IsDraw()
@@ -71,7 +72,7 @@ namespace Tennis
 
         private bool HasAdvantage()
         {
-            Int32 minusResult = _player1.Score - _player2.Score;
+            int minusResult = _player1.Score - _player2.Score;
             return minusResult == 1 || minusResult == -1;
         }
 
@@ -79,9 +80,14 @@ namespace Tennis
         {
             int minusResult = _player1.Score - _player2.Score;
             if (minusResult >= 1)
+            {
                 return _player1.Name;
+            }
+
             if (minusResult <= -1)
+            {
                 return _player2.Name;
+            }
 
             return null;
         }
